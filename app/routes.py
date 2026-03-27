@@ -22,6 +22,24 @@ def get_recipe(recipe_id: int):
     recipe = Recipe.query.get_or_404(recipe_id)
     return jsonify(recipe.to_dict())
 
+@main.route("/api/recipes/<int:recipe_id>", methods=["DELETE"])
+def delete_recipe(recipe_id: int):
+    recipe = Recipe.query.get_or_404(recipe_id)
+    db.session.delete(recipe)
+    db.session.commit()
+    return {"message": "recipe deleted"}, 204
+
+@main.route("/api/recipes/<int:recipe_id>/update", methods=["PUT"])
+def update_time(recipe_id):
+    recipe = Recipe.query.get_or_404(recipe_id)
+
+    data = request.get_json() or {}
+    recipe.prep_time = data["prep_time"]
+    db.session.commit()
+
+    return jsonify(recipe.to_dict()), 201
+
+
 
 @main.route("/api/recipes", methods=["POST"])
 def create_recipe():
