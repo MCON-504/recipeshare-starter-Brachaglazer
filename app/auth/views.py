@@ -1,5 +1,6 @@
 from flask import request, jsonify, render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
+from urllib.parse import urlparse
 
 from app.extensions import db
 from app.models import User
@@ -41,10 +42,15 @@ def register():
         user.password = form.password.data
         db.session.add(user)
         db.session.commit()
-        flash("Account created! Please log in.", "success")
-        return redirect(url_for("auth.login"))
+        login_user(user)
+        flash(f"Welcome, {user.username}! Your account has been created.", "success")
+        return redirect(url_for("main_bp.get_recipes"))
 
     return render_template("auth/register.html", form=form)
+
+def is_safe_url(target: str) -> bool:
+    parsed = urlparse(target)
+    return not parsed.netloc and parsed.path.startswith("/")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -72,13 +78,20 @@ def login():
 
         login_user(user, remember=form.remember_me.data)
         flash(f"Welcome back, {user.username}! You are now logged in.", "success")
+
+        next_url = request.args.get("next")
+
+        if is_safe_url(next_url):
+            return redirect(next_url)
         return redirect(url_for("main_bp.get_recipes"))
 
     return render_template("auth/login.html", form=form)
-
 
 @auth_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
-    return jsonify({"message": "logged out"}), 200
+    if request.is_json:
+        return jsonify({"message": "logged out"}), 200
+    flash("You have been logged out.", "info")
+    return redirect(url_for("main_bp.get_recipes"))
