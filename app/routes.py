@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from .extensions import db
 from .models import Recipe
 
-from .forms import RecipeForm
+from .forms import RecipeForm, FeedbackForm, ProfileForm
 
 main_bp = Blueprint("main_bp", __name__)
 
@@ -32,7 +32,7 @@ def get_recipe(recipe_id: int):
     if request.is_json:
         return jsonify(recipe.to_dict())
     else:
-        return render_template("recipe_detail.html", form=recipe)
+        return render_template("recipe_detail.html", recipe=recipe)
 
 
 @main_bp.route("/recipes", methods=["POST"])
@@ -99,3 +99,24 @@ def delete_recipe(recipe_id: int):
     db.session.delete(recipe)
     db.session.commit()
     return "", 204
+
+@main_bp.route("/feedback", methods=["GET", "POST"])
+def feedback():
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        flash(f"Thanks, {form.name.data}! We received your feedback.", "success")
+        return redirect(url_for("main_bp.feedback"))
+
+    return render_template("feedback.html", form=form)
+
+@main_bp.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    form = ProfileForm()
+
+    if form.validate_on_submit():
+        flash(f"Thanks, {form.display_name.data}! We received your profile.", "success")
+        return redirect(url_for("main_bp.profile"))
+
+    return render_template("profile_form.html", form=form)
