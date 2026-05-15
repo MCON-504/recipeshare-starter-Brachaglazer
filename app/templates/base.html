@@ -204,6 +204,7 @@
         <a class="navbar-brand" href="{{ url_for('home') }}">Recipe<span>Share</span></a>
         <div class="nav-links">
             <a href="{{ url_for('home') }}">Recipes</a>
+            <a href="{{ url_for('main_bp.profile') }}"> Profile</a>
             {% if current_user.is_authenticated %}
                 <span class="nav-user">Hi, {{ current_user.username }}</span>
                 <form method="POST" action="{{ url_for('auth.logout') }}" class="inline-form">
@@ -214,7 +215,6 @@
                 <a href="{{ url_for('auth.login') }}">Login</a>
                 <a href="{{ url_for('auth.register') }}" class="btn-nav">Register</a>
                 <a href="{{ url_for('main_bp.feedback') }}" class="btn-nav">Feedback</a>
-                <a href="{{ url_for('main_bp.profile') }}" class="btn-nav"> Profile</a>
             {% endif %}
         </div>
     </div>

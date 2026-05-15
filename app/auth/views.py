@@ -79,9 +79,8 @@ def login():
         login_user(user, remember=form.remember_me.data)
         flash(f"Welcome back, {user.username}! You are now logged in.", "success")
 
-        next_url = request.args.get("next")
-
-        if is_safe_url(next_url):
+        next_url = request.args.get("next", "")
+        if next_url and is_safe_url(next_url):
             return redirect(next_url)
         return redirect(url_for("main_bp.get_recipes"))
 

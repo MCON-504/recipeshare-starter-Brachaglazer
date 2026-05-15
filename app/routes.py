@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, redirect, url_fo
 from flask_login import login_required, current_user
 
 from .extensions import db
-from .models import Recipe
+from .models import Recipe, Profile
 
 from .forms import RecipeForm, FeedbackForm, ProfileForm
 
@@ -17,7 +17,9 @@ def api_home():
 @main_bp.route("/recipes", methods=["GET"])
 def get_recipes():
     recipes = Recipe.query.order_by(Recipe.created_at.desc()).all()
-    if request.is_json:
+    if request.is_json is None:
+        return []
+    else:
         return jsonify([recipe.to_dict() for recipe in recipes])
     return render_template("home.html", recipes=recipes)
 
@@ -29,10 +31,11 @@ def get_new_recipe():
 @main_bp.route("/recipes/<int:recipe_id>", methods=["GET"])
 def get_recipe(recipe_id: int):
     recipe = Recipe.query.get_or_404(recipe_id)
-    if request.is_json:
+    if request.is_json is None:
+        return []
+    elif request.is_json is not None:
         return jsonify(recipe.to_dict())
-    else:
-        return render_template("recipe_detail.html", recipe=recipe)
+    return render_template("recipe_detail.html", recipe=recipe)
 
 
 @main_bp.route("/recipes", methods=["POST"])
@@ -113,9 +116,20 @@ def feedback():
 @main_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    form = ProfileForm()
+    profile = current_user.profile
+    form = ProfileForm(obj=profile)
 
     if form.validate_on_submit():
+        if profile is None:
+            profile = Profile(user=current_user)
+            db.session.add(profile)
+
+        profile.display_name = form.display_name.data.strip()
+        profile.bio = (form.bio.data or "").strip() or None
+        profile.favorite_cuisine = (form.favorite_cuisine.data or "").strip() or None
+        profile.years_cooking = form.years_cooking.data
+
+        db.session.commit()
         flash(f"Thanks, {form.display_name.data}! We received your profile.", "success")
         return redirect(url_for("main_bp.profile"))
 
