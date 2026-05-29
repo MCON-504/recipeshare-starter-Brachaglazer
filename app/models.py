@@ -1,5 +1,4 @@
 from datetime import datetime, UTC
-
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -62,6 +61,8 @@ class Recipe(db.Model):
             "user_id": self.user_id,
         }
 class Profile(db.Model):
+    __tablename__ = "profile"
+
     id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String(80), nullable=False)
     bio = db.Column(db.String(300))
@@ -71,3 +72,16 @@ class Profile(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
     user = db.relationship("User", backref=db.backref("profile", uselist=False))
 
+class RecipeReview(db.Model):
+    __tablename__ = "reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC), nullable=False)
+
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False, unique=True)
+    recipe = db.relationship("Recipe", backref=db.backref("reviews", lazy=True))
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
+    user = db.relationship("User", backref=db.backref("reviews", lazy=True))
