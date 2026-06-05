@@ -30,11 +30,11 @@ class RecipeForm(FlaskForm):
         "Description",
         validators=[DataRequired(), Length(max=120)]
     )
-    instructions = PasswordField(
+    instructions = TextAreaField(
         "Instructions",
         validators=[DataRequired(), Length(min=8)]
     )
-    prep_time = PasswordField(
+    prep_time = IntegerField(
         "Prep Time",
         validators=[DataRequired()]
     )
