@@ -2,6 +2,19 @@
 
 RecipeShare is a Flask starter app that supports both browser pages and JSON API clients.
 
+## Reflection:
+
+What is the difference between the RecipeReviewForm and the RecipeReview model?
+The form is the FE form displayed to the user and the model is the database table.
+Why does the review route need both GET and POST?
+The review route needs get to retrieve reviews from the database and post to add new reviews.
+What happens when form.validate_on_submit() returns False?
+The form template is rendered.
+Why should this route require login?
+Because only authenticated users can submit reviews.
+What database relationship connects a review to a recipe?
+The review is connected to the recipe using a foreign key to the recipe table (recipe id)
+
 ## Tech Stack
 
 - Flask
